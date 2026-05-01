@@ -18,17 +18,17 @@ Clique no botão **Use this template** para criar um novo repositório com base 
 ├── notebooks          <- Cadernos Jupyter. A convenção de nomenclatura é um número (para ordenação),
 │                         as iniciais do criador e uma descrição curta separada por `-`, por exemplo
 │                         `01-fb-exploracao-inicial-de-dados`.
-│
-|   └──src             <- Código-fonte para uso neste projeto.
-|      │
-|      ├── __init__.py  <- Torna um módulo Python
-|      ├── config.py    <- Configurações básicas do projeto
-|      └── graficos.py  <- Scripts para criar visualizações exploratórias e orientadas a resultados
 |
 ├── referencias        <- Dicionários de dados, manuais e todos os outros materiais explicativos.
 |
 ├── relatorios         <- Análises geradas em HTML, PDF, LaTeX, etc.
 │   └── imagens        <- Gráficos e figuras gerados para serem usados em relatórios
+|
+└── src                <- Código-fonte para uso neste projeto.
+   │
+   ├── __init__.py     <- Torna um módulo Python
+   ├── config.py       <- Configurações básicas do projeto
+   └── graficos.py     <- Scripts para criar visualizações exploratórias e orientadas a resultados
 ```
 
 ## Configuração do ambiente
@@ -51,14 +51,14 @@ Clique no botão **Use this template** para criar um novo repositório com base 
     para o arquivo `requirements.txt` ou outro formato de sua preferência. Adicione o
     arquivo ao controle de versão, removendo o arquivo `ambiente.yml`.
 
-3. Verifique o arquivo `notebooks/01-fb-exemplo.ipynb` para exemplos
+3. Verifique o arquivo `notebooks/01_EDA.ipynb` para exemplos
 de uso do código.
-4. Renomeie o arquivo `notebooks/01-fb-exemplo.ipynb` para um nome
+4. Renomeie o arquivo `notebooks/01_EDA.ipynb` para um nome
 mais apropriado ao seu projeto. E siga a convenção de nomenclatura para os demais
 notebooks.
 5. Remova arquivos de exemplo e adicione os arquivos de dados e notebooks do seu
 projeto.
-6. Verifique o arquivo `notebooks/src/config.py` para configurações básicas do projeto.
+6. Verifique o arquivo `src/config.py` para configurações básicas do projeto.
 Modifique conforme necessário, adicionando ou removendo caminhos de arquivos e
 diretórios.
 7. Atualize o arquivo `referencias/01_dicionario_de_dados.md` com o dicionário de dados
@@ -70,11 +70,7 @@ se precisar de ajuda para escolher uma licença.
 10. Renomeie o arquivo `.env.exemplo` para `.env`
 11. Adicione variáveis de ambiente sensíveis ao arquivo `.env`.
 
-Por padrão, o arquivo `.gitignore` já está configurado para ignorar arquivos de dados e
-arquivos de Notebook (para aqueles que usam ferramentas como
-[Jupytext](https://jupytext.readthedocs.io/en/latest/) e similares). Adicione ou remova
-outros arquivos e diretórios do `.gitignore` conforme necessário. Caso deseje adicionar
-forçadamente um Notebook ao controle de versão, faça um commit forçado com o
-comando `git add --force NOME_DO_ARQUIVO.ipynb`.
+Por padrão, o arquivo `.gitignore` já está configurado para ignorar arquivos de dados.
+Adicione ou remova outros arquivos e diretórios do `.gitignore` conforme necessário.
 
 Para mais informações sobre como usar Git e GitHub, [clique aqui](https://cienciaprogramada.com.br/2021/09/guia-definitivo-git-github/). Sobre ambientes virtuais, [clique aqui](https://cienciaprogramada.com.br/2020/08/ambiente-virtual-projeto-python/).
