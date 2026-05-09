@@ -77,7 +77,7 @@ Isso indica que o modelo explica cerca de 45% da variacao do target, mas ainda h
 
 A explicacao tecnica detalhada dos notebooks esta em:
 
-- [`referencias/02_revisao_tecnica_notebooks.md`](referencias/02_revisao_tecnica_notebooks.md)
+- [`referencias/02_revisao_tecnica_notebooks.md`](referencias/analise_tecnica.md)
 
 ## Proximos Passos
 
