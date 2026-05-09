@@ -7,6 +7,7 @@ PASTA_DADOS = PASTA_PROJETO / "dados"
 
 # coloque abaixo o caminho para os arquivos de dados de seu projeto
 DADOS_TRATADOS = PASTA_DADOS / "diabetes_tratados.parquet"
+DADOS_CATEGORIZADOS = PASTA_DADOS / "diabetes_categorizado.parquet"
 
 # coloque abaixo o caminho para os arquivos de modelos de seu projeto
 PASTA_MODELOS = PASTA_PROJETO / "modelos"
