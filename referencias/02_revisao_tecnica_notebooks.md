@@ -228,7 +228,7 @@ Esse e o comportamento desejado.
 
 ## 04 - Introducao a Pipelines
 
-Notebook: `notebooks/04_introducao_a_pipelines.ipynb`
+Notebook: `notebooks/04_introducao_pipelines.ipynb`
 
 ### O que foi feito
 
@@ -304,7 +304,7 @@ Essa observacao e importante porque algumas metricas sao simetricas, mas o `R2` 
 
 ## 05 - One-Hot Encoding e ColumnTransformer
 
-Notebook: `notebooks/05_one_hot_parte_01_inicio.ipynb`
+Notebook: `notebooks/05_one_hot.ipynb`
 
 ### Problema tratado
 
@@ -472,31 +472,3 @@ Isso pode acontecer por alguns motivos:
 - ruido natural nos dados clinicos;
 - limite do proprio conjunto de variaveis disponiveis;
 - multicolinearidade entre variaveis metabolicas.
-
-## Proximos Estudos Recomendados
-
-Os proximos passos mais naturais sao:
-
-- corrigir o `r2_score` no notebook de pipeline;
-- aplicar validacao cruzada;
-- comparar `LinearRegression` com `Ridge`, `Lasso` e `ElasticNet`;
-- testar modelos nao lineares;
-- avaliar importancia de variaveis;
-- criar um pipeline reutilizavel em `src/models`;
-- salvar o modelo treinado em `modelos/`;
-- gerar relatorios com metricas e graficos em `relatorios/`.
-
-## Checklist de Revisao
-
-Use esta lista para revisar o conteudo antes de seguir para modelos mais avancados:
-
-- Sei explicar o que e `X` e o que e `y`.
-- Sei por que separar treino e teste.
-- Sei interpretar `MAE`, `MSE`, `RMSE` e `R2`.
-- Sei por que o `R2` deve receber `y_test` antes de `y_pred`.
-- Sei explicar o papel do `StandardScaler`.
-- Sei explicar por que `sexo` deve ser tratado como categoria.
-- Sei montar um `Pipeline`.
-- Sei usar `ColumnTransformer` para tratar colunas diferentes.
-- Sei que coeficiente alto nao significa automaticamente causalidade.
-- Sei usar curva de aprendizado para diagnosticar overfitting e underfitting.
