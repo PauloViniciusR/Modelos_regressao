@@ -228,7 +228,7 @@ Esse e o comportamento desejado.
 
 ## 04 - Introducao a Pipelines
 
-Notebook: `notebooks/04_introducao_pipelines.ipynb`
+Notebook: `notebooks/04_introducao_a_pipelines.ipynb`
 
 ### O que foi feito
 
@@ -278,23 +278,15 @@ As metricas de erro permaneceram praticamente iguais ao notebook anterior:
 | `MSE` | `2900.19` |
 | `RMSE` | `53.85` |
 
-### Ponto de atencao
+### Ponto de atencao corrigido
 
-No notebook existe uma chamada de `r2_score` com argumentos invertidos:
-
-```python
-r2_score(y_pred, y_test)
-```
-
-O correto e:
+As metricas devem receber primeiro os valores reais e depois as predicoes:
 
 ```python
 r2_score(y_test, y_pred)
 ```
 
-Essa inversao altera o resultado do `R2`. O valor exibido no notebook, aproximadamente `0.0069`, nao representa o desempenho correto do modelo.
-
-O `R2` correto fica proximo de:
+No notebook de pipeline, essa ordem foi corrigida para `MAE`, `MSE`, `RMSE`, `R2` e para o grafico de residuos. O `R2` correto fica proximo de:
 
 ```text
 0.453
@@ -375,6 +367,50 @@ As metricas ficaram praticamente iguais ao baseline:
 | `RMSE` | `53.85` |
 
 Isso mostra que o tratamento categorico nao melhorou necessariamente o desempenho nesse dataset, mas melhorou a corretude tecnica do pipeline.
+
+## 06 - Outras Transformacoes
+
+Notebook: `notebooks/06_outras_transformacoes.ipynb`
+
+### O que foi feito
+
+Esse notebook evolui o preprocessamento para um fluxo com transformacoes diferentes por grupo de variaveis.
+
+Foram usadas:
+
+- `PowerTransformer(method="box-cox")` em `imc`, `ldl`, `hdl` e `colesterol_total`;
+- `StandardScaler` em `idade`, `pressao_media`, `triglicerides` e `glicose`;
+- `OrdinalEncoder` na nova variavel `colesterol_hdl_cat`;
+- `OneHotEncoder(drop="if_binary")` em `sexo`;
+- `LinearRegression` como estimador final.
+
+### Categorizacao de colesterol_hdl
+
+A variavel `colesterol_hdl` foi arredondada, convertida para inteiro e depois categorizada em faixas:
+
+```python
+pd.cut(
+    df["colesterol_hdl"],
+    bins=[2, 4, 6, 10],
+    labels=["2-3", "4-5", "6+"],
+    right=False,
+)
+```
+
+Como essas faixas possuem ordem natural, o uso de `OrdinalEncoder` faz sentido nesse caso.
+
+### Resultado
+
+O modelo com transformacoes mistas apresentou:
+
+| Metrica | Valor aproximado |
+|---|---:|
+| `R2` | `0.442` |
+| `MAE` | `43.64` |
+| `MSE` | `2957.29` |
+| `RMSE` | `54.38` |
+
+O desempenho ficou um pouco pior que o baseline linear anterior. Isso e um ponto importante: nem toda transformacao melhora o modelo. Transformacoes devem ser avaliadas por metrica, validacao e coerencia com o problema.
 
 ## Pontos Fundamentais para Revisao
 

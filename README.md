@@ -22,17 +22,19 @@ Construir uma base solida para modelagem de regressao, passando por:
 ```text
 .
 |-- dados/
+|   |-- diabetes_categorizado.parquet
 |   `-- diabetes_tratados.parquet
 |-- modelos/
 |-- notebooks/
 |   |-- 01_EDA.ipynb
 |   |-- 02_regressao_linear.ipynb
 |   |-- 03_curva_aprendizado.ipynb
-|   |-- 04_introducao_pipelines.ipynb
-|   `-- 05_one_hot.ipynb
+|   |-- 04_introducao_a_pipelines.ipynb
+|   |-- 05_one_hot.ipynb
+|   `-- 06_outras_transformacoes.ipynb
 |-- referencias/
 |   |-- 01_dicionario_de_dados.md
-|   `-- 02_revisao_tecnica_notebooks.md
+|   `-- analise_tecnica.md
 |-- relatorios/
 `-- src/
     |-- config.py
@@ -47,8 +49,9 @@ Construir uma base solida para modelagem de regressao, passando por:
 | `01_EDA.ipynb` | Analise exploratoria | Carregamento do dataset, renomeacao de colunas, estatisticas descritivas, correlacao e exportacao da base tratada |
 | `02_regressao_linear.ipynb` | Baseline | Treino de `LinearRegression`, avaliacao com `MAE`, `MSE`, `RMSE`, `R2`, coeficientes e residuos |
 | `03_curva_aprendizado.ipynb` | Diagnostico | Uso de curva de aprendizado para avaliar comportamento do modelo conforme o volume de treino |
-| `04_introducao_pipelines.ipynb` | Pipeline | Encapsulamento de `StandardScaler` e `LinearRegression` em um `Pipeline` |
+| `04_introducao_a_pipelines.ipynb` | Pipeline | Encapsulamento de `StandardScaler` e `LinearRegression` em um `Pipeline` |
 | `05_one_hot.ipynb` | Variaveis categoricas | Uso de `ColumnTransformer` e `OneHotEncoder` para tratar a coluna `sexo` corretamente |
+| `06_outras_transformacoes.ipynb` | Transformacoes mistas | Uso de `PowerTransformer`, `OrdinalEncoder`, `OneHotEncoder` e `StandardScaler` no mesmo pipeline |
 
 
 ## Resultado Atual
@@ -77,7 +80,12 @@ Isso indica que o modelo explica cerca de 45% da variacao do target, mas ainda h
 
 A explicacao tecnica detalhada dos notebooks esta em:
 
-- [`referencias/02_revisao_tecnica_notebooks.md`](referencias/analise_tecnica.md)
+- [`referencias/analise_tecnica.md`](referencias/analise_tecnica.md)
 
 ## Proximos Passos
 
+- Comparar modelos regularizados: `Ridge`, `Lasso` e `ElasticNet`.
+- Usar validacao cruzada para obter avaliacao mais estavel.
+- Testar modelos nao lineares, como `RandomForestRegressor` e `GradientBoostingRegressor`.
+- Salvar modelos treinados em `modelos/`.
+- Gerar relatorios e imagens em `relatorios/`.
