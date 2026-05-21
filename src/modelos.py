@@ -66,9 +66,11 @@ def organiza_resultados(resultados):
         df_resultados.columns[1:].to_list()
     ).reset_index(drop=True)
 
-    try:
-        df_resultados_expandido = df_resultados_expandido.apply(pd.to_numeric)
-    except ValueError:
-        pass
+    df_resultados_expandido.columns = df_resultados_expandido.columns.str.strip()
+
+    colunas_numericas = df_resultados_expandido.columns.drop("model")
+    df_resultados_expandido[colunas_numericas] = df_resultados_expandido[
+        colunas_numericas
+    ].apply(pd.to_numeric)
 
     return df_resultados_expandido
