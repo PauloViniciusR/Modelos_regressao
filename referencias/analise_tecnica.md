@@ -17,6 +17,9 @@ A sequencia dos notebooks segue uma ordem adequada:
 5. diagnosticar aprendizado;
 6. organizar preprocessamento e modelo em pipelines;
 7. tratar variaveis categoricas corretamente.
+8. aplicar transformacoes em features e target;
+9. avaliar modelos com validacao cruzada;
+10. comparar modelos e preprocessamentos por metricas.
 
 ## 01 - Analise Exploratoria dos Dados
 
@@ -108,6 +111,14 @@ Isso cria uma separacao importante entre:
 
 - dados brutos carregados do Scikit-learn;
 - dados tratados usados nos proximos notebooks.
+
+Nos notebooks com categorizacao de `colesterol_hdl`, tambem e usada a base:
+
+```text
+dados/diabetes_categorizado.parquet
+```
+
+Essa segunda versao contem a coluna `colesterol_hdl_cat`, necessaria para os pipelines com `OrdinalEncoder`.
 
 ## 02 - Regressao Linear
 
@@ -412,6 +423,165 @@ O modelo com transformacoes mistas apresentou:
 
 O desempenho ficou um pouco pior que o baseline linear anterior. Isso e um ponto importante: nem toda transformacao melhora o modelo. Transformacoes devem ser avaliadas por metrica, validacao e coerencia com o problema.
 
+## 07 - Transformacao do Target
+
+Notebook: `notebooks/07_target_transformer.ipynb`
+
+### O que foi feito
+
+Esse notebook introduz o uso de `TransformedTargetRegressor`, que permite aplicar uma transformacao em `y` durante o treino e reverter essa transformacao durante a predicao.
+
+O fluxo fica conceitualmente assim:
+
+1. transforma `y` no treinamento;
+2. ajusta o modelo usando o target transformado;
+3. gera predicoes;
+4. aplica a transformacao inversa para voltar a escala original do target.
+
+### Por que usar
+
+Transformar o target pode ajudar quando `y` possui assimetria, caudas longas ou distribuicao pouco adequada para modelos lineares.
+
+No projeto, essa tecnica foi combinada com:
+
+- `Pipeline`;
+- `ColumnTransformer`;
+- transformacoes numericas e categoricas;
+- `LinearRegression`.
+
+### Ponto tecnico
+
+O target deve ser transformado dentro do processo de validacao ou treino, nao manualmente antes da separacao dos dados. O `TransformedTargetRegressor` ajuda a manter esse fluxo mais seguro e reproduzivel.
+
+## 08 - Validacao Cruzada
+
+Notebook: `notebooks/08_validacao_cruzada.ipynb`
+
+### O que foi feito
+
+Foi introduzida a avaliacao com `KFold` e `cross_validate`.
+
+Em vez de depender de uma unica divisao treino/teste, a validacao cruzada avalia o modelo em diferentes particoes dos dados. Isso gera uma estimativa mais estavel de desempenho.
+
+Exemplo do conceito:
+
+```python
+kf = KFold(n_splits=5, shuffle=True, random_state=42)
+
+scores = cross_validate(
+    model,
+    X,
+    y,
+    cv=kf,
+    scoring=[
+        "r2",
+        "neg_mean_absolute_error",
+        "neg_root_mean_squared_error",
+    ],
+)
+```
+
+### Interpretacao das metricas negativas
+
+No Scikit-learn, metricas de erro usadas em `scoring` aparecem com sinal negativo quando seguem a convencao de que "maior e melhor".
+
+Por isso:
+
+- `neg_mean_absolute_error` representa o `MAE` com sinal negativo;
+- `neg_root_mean_squared_error` representa o `RMSE` com sinal negativo.
+
+Para interpretar como erro comum, pode-se multiplicar por `-1`.
+
+## 09 - Dummy Regressor
+
+Notebook: `notebooks/09_dummy_regressor.ipynb`
+
+### O que foi feito
+
+Foi usado `DummyRegressor` como baseline ingenuo.
+
+Esse modelo nao aprende relacoes reais entre `X` e `y`. Com `strategy="mean"`, por exemplo, ele sempre prediz a media do target observada no treino.
+
+### Por que isso importa
+
+Um modelo real precisa superar um baseline simples. Se `LinearRegression`, modelos regularizados ou modelos nao lineares nao superarem o `DummyRegressor`, existe algum problema no pipeline, nas features, na avaliacao ou na propria capacidade preditiva dos dados.
+
+Esse passo melhora a qualidade da analise porque evita comparar modelos apenas entre si sem uma referencia minima.
+
+## 10 - Analise de Complexidade
+
+Notebook: `notebooks/10. analise_complexidade.ipynb`
+
+### O que foi feito
+
+Esse notebook compara diferentes niveis de preprocessamento:
+
+- preprocessamento categorico;
+- preprocessamento simples;
+- preprocessamento completo.
+
+Como o preprocessamento completo usa `colesterol_hdl_cat`, o notebook deve carregar:
+
+```python
+from src.config import DADOS_CATEGORIZADOS
+
+df = pd.read_parquet(DADOS_CATEGORIZADOS)
+```
+
+Se for usado `DADOS_TRATADOS`, a coluna `colesterol_hdl_cat` nao existe e o `ColumnTransformer` falha.
+
+### Erro comum corrigido
+
+O objeto `resultados` retornado pela validacao cruzada e um dicionario. Ele nao deve ser passado diretamente para `sns.boxplot`, porque o Seaborn espera um DataFrame com colunas como `model`, `test_r2` e `time_seconds`.
+
+Fluxo correto:
+
+```python
+resultados = {
+    nome_modelo: treinar_e_validar_modelo_regressao(X, y, **regressor)
+    for nome_modelo, regressor in regressors.items()
+}
+
+df_resultados = organiza_resultados(resultados)
+```
+
+Depois:
+
+```python
+sns.boxplot(
+    x="model",
+    y="test_r2",
+    data=df_resultados,
+)
+```
+
+Se aparecer o erro:
+
+```text
+ValueError: Could not interpret value `model` for `x`
+```
+
+significa que o objeto passado em `data` nao possui a coluna `model`. Na pratica, isso costuma acontecer quando se usa `data=resultados` em vez de `data=df_resultados`.
+
+Se aparecer:
+
+```text
+NameError: name 'df_resultados' is not defined
+```
+
+significa que a celula que cria `df_resultados = organiza_resultados(resultados)` nao foi executada com sucesso antes do grafico.
+
+### Funcao de apoio
+
+A funcao `organiza_resultados` transforma o dicionario do `cross_validate` em formato tabular, expandindo as metricas por fold e criando a coluna `model`.
+
+Esse formato e adequado para:
+
+- graficos com Seaborn;
+- comparacao de distribuicao das metricas;
+- analise de tempo de treino e score;
+- comparacao visual entre modelos e preprocessamentos.
+
 ## Pontos Fundamentais para Revisao
 
 ### 1. EDA vem antes da modelagem
@@ -494,6 +664,28 @@ A curva de aprendizado ajuda a responder:
 - o modelo esta sofrendo overfitting?
 - o modelo esta sofrendo underfitting?
 - o modelo e limitado demais para o problema?
+
+### 9. Validacao cruzada reduz dependencia de uma unica divisao
+
+Uma unica separacao treino/teste pode gerar uma estimativa instavel em bases pequenas. Com `KFold`, o modelo e avaliado em varias particoes, tornando a comparacao mais confiavel.
+
+### 10. Resultados de validacao precisam ser organizados antes de plotar
+
+O retorno de `cross_validate` e um dicionario de arrays. Para graficos comparativos, ele deve ser convertido para DataFrame.
+
+No projeto, essa conversao e feita por:
+
+```python
+df_resultados = organiza_resultados(resultados)
+```
+
+O grafico deve usar `data=df_resultados`, nao `data=resultados`.
+
+### 11. A versao do dataset precisa ser compativel com o preprocessador
+
+Se o preprocessador usa `colesterol_hdl_cat`, a base correta e `DADOS_CATEGORIZADOS`.
+
+Se a base carregada for `DADOS_TRATADOS`, essa coluna nao existe e o erro esperado e uma incompatibilidade entre as colunas esperadas pelo `ColumnTransformer` e as colunas disponiveis em `X`.
 
 ## Diagnostico Atual
 
