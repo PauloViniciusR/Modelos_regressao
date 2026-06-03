@@ -17,6 +17,8 @@ def treinar_e_validar_modelo_regressao(
     random_state=RANDOM_STATE,
 ):
 
+    validar_colunas_preprocessador(X, preprocessor)
+
     model = construir_pipeline_modelo(regressor, preprocessor, target_transformer)
 
     kf = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)
@@ -34,6 +36,37 @@ def treinar_e_validar_modelo_regressao(
     )
 
     return scores
+
+
+def validar_colunas_preprocessador(X, preprocessor):
+    if preprocessor is None or not hasattr(X, "columns"):
+        return
+
+    colunas_esperadas = obter_colunas_preprocessador(preprocessor)
+    colunas_faltantes = sorted(set(colunas_esperadas) - set(X.columns))
+
+    if colunas_faltantes:
+        colunas_disponiveis = ", ".join(X.columns)
+        colunas_faltantes_texto = ", ".join(colunas_faltantes)
+        raise ValueError(
+            "O preprocessador espera colunas que nao existem em X: "
+            f"{colunas_faltantes_texto}. "
+            f"Colunas disponiveis em X: {colunas_disponiveis}"
+        )
+
+
+def obter_colunas_preprocessador(preprocessor):
+    colunas = []
+
+    for _, _, transformer_columns in getattr(preprocessor, "transformers", []):
+        if isinstance(transformer_columns, str):
+            colunas.append(transformer_columns)
+        elif isinstance(transformer_columns, (list, tuple)):
+            colunas.extend(
+                coluna for coluna in transformer_columns if isinstance(coluna, str)
+            )
+
+    return colunas
 
 
 def construir_pipeline_modelo(regressor, preprocessor, target_transformer):
