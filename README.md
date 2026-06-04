@@ -7,6 +7,10 @@ O fluxo atual usa o dataset `load_diabetes` do Scikit-learn para prever a progre
 - `dados/diabetes_tratados.parquet`: base numerica tratada.
 - `dados/diabetes_categorizado.parquet`: base com a coluna ordinal `colesterol_hdl_cat`, usada nos pipelines com `OrdinalEncoder`.
 
+## Descricao para o GitHub
+
+Projeto de ciencia de dados para comparar modelos de regressao no dataset Diabetes, com EDA, versionamento de dados em Parquet, pipelines de preprocessamento, validacao cruzada e avaliacao de modelos lineares regularizados.
+
 ## Objetivo
 
 Construir uma base solida para modelagem de regressao, passando por:
@@ -18,7 +22,8 @@ Construir uma base solida para modelagem de regressao, passando por:
 - avaliacao por metricas de regressao;
 - analise de residuos e coeficientes;
 - curvas de aprendizado;
-- uso de `Pipeline`, `StandardScaler`, `ColumnTransformer`, `OneHotEncoder`, `OrdinalEncoder`, transformacoes de target e validacao cruzada.
+- uso de `Pipeline`, `StandardScaler`, `ColumnTransformer`, `OneHotEncoder`, `OrdinalEncoder`, transformacoes de target e validacao cruzada;
+- comparacao entre `DummyRegressor`, `LinearRegression`, `Lasso`, `Ridge` e `ElasticNet`.
 
 ## Estrutura do Projeto
 
@@ -38,7 +43,8 @@ Construir uma base solida para modelagem de regressao, passando por:
 |   |-- 07_target_transformer.ipynb
 |   |-- 08_validacao_cruzada.ipynb
 |   |-- 09_dummy_regressor.ipynb
-|   `-- 10. analise_complexidade.ipynb
+|   |-- 10. analise_complexidade.ipynb
+|   `-- 11_outros_modelos.ipynb
 |-- referencias/
 |   `-- analise_tecnica.md
 |-- relatorios/
@@ -63,6 +69,7 @@ Construir uma base solida para modelagem de regressao, passando por:
 | `08_validacao_cruzada.ipynb` | Validacao cruzada | Avaliacao com `KFold` e `cross_validate` usando metricas de regressao |
 | `09_dummy_regressor.ipynb` | Baseline ingenuo | Comparacao com `DummyRegressor` para validar se modelos reais superam um baseline simples |
 | `10. analise_complexidade.ipynb` | Comparacao de preprocessamentos | Comparacao entre pipelines categoricos, simples e completos |
+| `11_outros_modelos.ipynb` | Modelos regularizados | Comparacao entre `LinearRegression`, `Lasso`, `Ridge` e `ElasticNet`, com variacoes de preprocessamento, transformacao do target e hiperparametros iniciais |
 
 ## Uso Correto dos Dados
 
@@ -145,6 +152,14 @@ O modelo baseline de regressao linear apresenta desempenho moderado:
 
 Isso indica que o modelo explica cerca de 45% da variacao do target, mas ainda ha erro residual relevante. Esse resultado serve como baseline para comparacao com modelos regularizados e nao lineares.
 
+Na etapa mais recente, o projeto amplia a comparacao para modelos regularizados:
+
+- `Lasso`: adiciona penalizacao L1 e pode zerar coeficientes, funcionando como uma selecao implicita de variaveis.
+- `Ridge`: adiciona penalizacao L2 e tende a estabilizar coeficientes em cenarios com variaveis correlacionadas.
+- `ElasticNet`: combina L1 e L2, equilibrando selecao de variaveis e estabilidade.
+
+Os modelos sao comparados com `KFold`, `cross_validate` e os mesmos indicadores principais: `R2`, `MAE`, `RMSE` e tempo de execucao. O `DummyRegressor` permanece como baseline minimo para verificar se os modelos reais capturam sinal preditivo.
+
 ## Pontos Tecnicos Importantes
 
 - A analise exploratoria vem antes da modelagem.
@@ -156,6 +171,8 @@ Isso indica que o modelo explica cerca de 45% da variacao do target, mas ainda h
 - `OrdinalEncoder` deve ser usado apenas em categorias com ordem real, como `colesterol_hdl_cat`.
 - `ColumnTransformer` permite aplicar transformacoes diferentes por tipo de variavel.
 - `cross_validate` retorna arrays por metrica; para comparacao grafica, organize os resultados em formato tabular.
+- Modelos regularizados ajudam a controlar overfitting e coeficientes instaveis, mas devem ser comparados por validacao cruzada.
+- Transformacoes mais complexas so devem ser mantidas quando melhoram desempenho ou interpretabilidade de forma consistente.
 - As metricas de regressao devem ser calculadas com a ordem correta: `metrica(y_test, y_pred)`.
 
 ## Material de Revisao

@@ -16,10 +16,11 @@ A sequencia dos notebooks segue uma ordem adequada:
 4. avaliar desempenho;
 5. diagnosticar aprendizado;
 6. organizar preprocessamento e modelo em pipelines;
-7. tratar variaveis categoricas corretamente.
+7. tratar variaveis categoricas corretamente;
 8. aplicar transformacoes em features e target;
 9. avaliar modelos com validacao cruzada;
-10. comparar modelos e preprocessamentos por metricas.
+10. comparar modelos e preprocessamentos por metricas;
+11. comparar modelos lineares regularizados.
 
 ## 01 - Analise Exploratoria dos Dados
 
@@ -582,6 +583,85 @@ Esse formato e adequado para:
 - analise de tempo de treino e score;
 - comparacao visual entre modelos e preprocessamentos.
 
+## 11 - Outros Modelos
+
+Notebook: `notebooks/11_outros_modelos.ipynb`
+
+### O que foi feito
+
+Esse notebook amplia a comparacao iniciada na analise de complexidade. Alem de `DummyRegressor` e `LinearRegression`, foram avaliados modelos lineares regularizados:
+
+- `Lasso`;
+- `Ridge`;
+- `ElasticNet`.
+
+Os modelos foram combinados com diferentes configuracoes:
+
+- preprocessamento apenas categorico;
+- preprocessamento simples com `StandardScaler`;
+- preprocessamento completo com `PowerTransformer`, `StandardScaler`, `OrdinalEncoder` e `OneHotEncoder`;
+- preprocessamento completo com transformacao do target via `QuantileTransformer`;
+- ajustes iniciais de hiperparametros, como `alpha=0.1`.
+
+### Por que testar modelos regularizados
+
+Modelos regularizados sao importantes porque reduzem a liberdade do modelo e ajudam a controlar coeficientes instaveis.
+
+O `Lasso` usa penalizacao L1. Essa penalizacao pode zerar coeficientes e, por isso, funciona como uma forma simples de selecao de variaveis.
+
+O `Ridge` usa penalizacao L2. Ele nao costuma zerar coeficientes, mas reduz magnitudes e tende a ser util quando ha multicolinearidade entre variaveis.
+
+O `ElasticNet` combina L1 e L2. Ele pode ser util quando se deseja equilibrar selecao de variaveis e estabilidade numerica.
+
+### Avaliacao
+
+A avaliacao manteve o mesmo padrao tecnico:
+
+```python
+resultados = {
+    nome_modelo: treinar_e_validar_modelo_regressao(X, y, **regressor)
+    for nome_modelo, regressor in regressors.items()
+}
+
+df_resultados = organiza_resultados(resultados)
+```
+
+Depois, foi criada a coluna `model_group`:
+
+```python
+df_resultados["model_group"] = df_resultados["model"].str.split("_").str[0]
+```
+
+Essa coluna permite comparar visualmente familias de modelos no Seaborn, por exemplo:
+
+- `DummyRegressor`;
+- `LinearRegression`;
+- `Lasso`;
+- `Ridge`;
+- `ElasticNet`.
+
+### Interpretacao tecnica
+
+O `DummyRegressor` continua sendo a referencia minima. Qualquer modelo treinado precisa supera-lo de forma consistente.
+
+A regressao linear simples continua sendo um baseline forte para este dataset. A inclusao de modelos regularizados e tecnicamente correta porque permite avaliar se penalizacoes L1 e L2 melhoram generalizacao ou estabilidade.
+
+Entretanto, a regularizacao nao deve ser assumida como melhoria automatica. O ganho deve aparecer nas metricas de validacao cruzada, especialmente em `test_r2`, `test_neg_mean_absolute_error` e `test_neg_root_mean_squared_error`.
+
+Tambem e importante comparar tempo de execucao. Pipelines com `PowerTransformer` e `QuantileTransformer` adicionam custo computacional; esse custo so vale a pena se houver ganho claro de desempenho, estabilidade ou interpretabilidade.
+
+### Ponto de atencao
+
+O notebook usa a base categorizada:
+
+```python
+from src.config import DADOS_CATEGORIZADOS
+
+df = pd.read_parquet(DADOS_CATEGORIZADOS)
+```
+
+Essa escolha e obrigatoria porque os preprocessadores usam `colesterol_hdl_cat`. Se a base numerica tratada for usada no lugar dela, o validador de colunas em `src.modelos.validar_colunas_preprocessador` deve bloquear o treino com uma mensagem indicando as colunas faltantes.
+
 ## Pontos Fundamentais para Revisao
 
 ### 1. EDA vem antes da modelagem
@@ -687,6 +767,12 @@ Se o preprocessador usa `colesterol_hdl_cat`, a base correta e `DADOS_CATEGORIZA
 
 Se a base carregada for `DADOS_TRATADOS`, essa coluna nao existe e o erro esperado e uma incompatibilidade entre as colunas esperadas pelo `ColumnTransformer` e as colunas disponiveis em `X`.
 
+### 12. Regularizacao deve ser validada, nao presumida
+
+`Lasso`, `Ridge` e `ElasticNet` sao alternativas naturais depois da regressao linear porque controlam a magnitude dos coeficientes e podem melhorar generalizacao.
+
+Mesmo assim, a decisao deve ser baseada em validacao cruzada. Um modelo mais complexo ou mais regularizado so deve substituir o baseline se entregar ganho consistente em metrica, estabilidade ou interpretabilidade.
+
 ## Diagnostico Atual
 
 O modelo atual e tecnicamente coerente como baseline, mas ainda limitado.
@@ -700,3 +786,5 @@ Isso pode acontecer por alguns motivos:
 - ruido natural nos dados clinicos;
 - limite do proprio conjunto de variaveis disponiveis;
 - multicolinearidade entre variaveis metabolicas.
+
+A etapa mais recente torna o diagnostico mais robusto ao comparar familias de modelos. O proximo passo natural seria uma busca controlada de hiperparametros para `Lasso`, `Ridge` e `ElasticNet`, usando validacao cruzada e mantendo o `DummyRegressor` e a regressao linear como referencias.
